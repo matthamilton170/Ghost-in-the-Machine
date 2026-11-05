@@ -1,23 +1,26 @@
 from pynput import keyboard, mouse
-import time
+from storage import EventWriter
 
+writer = EventWriter("C:\\dev\\ghost-data\\events.csv")
 
 
 def on_press(key):
-    print(time.time(), "Key down")
+    writer.log("key_down")
 
 def on_release(key):
-    print(time.time(), "Key up")
+    writer.log("key_up")
 
 def on_click(x, y, button, pressed):
     if pressed:
-        print(time.time(), "Mouse button down")
+        writer.log("mouse_down")
     else:
-        print(time.time(), "Mouse button up")
+        writer.log("mouse_up")
 
 k_listener = keyboard.Listener(on_press=on_press, on_release=on_release)
 m_listener = mouse.Listener(on_click=on_click)
 
+
+writer.start()
 k_listener.start()
 m_listener.start()
 
@@ -27,3 +30,4 @@ except KeyboardInterrupt:
     print("Stopping...")
     k_listener.stop()
     m_listener.stop()
+    writer.stop()
