@@ -15,12 +15,15 @@ class EventWriter:
     def start(self):
         self.thread.start()
 
-    def log (self, event_type):
-        self.event_queue.put((time.time(),event_type))
+    def log (self, event_type, x=None, y=None):
+        self.event_queue.put((time.time(), event_type, x, y))
 
     def stop(self):
         self.stop_event.set()
         self.thread.join()
+
+    def is_alive(self):
+        return self.thread.is_alive()
 
     def _run(self):
         needs_header = (
@@ -31,15 +34,15 @@ class EventWriter:
         with open(self.file_path, 'a', newline="") as f:
             csv_writer = csv.writer(f)
             if needs_header:
-                csv_writer.writerow(["timestamp", "event_type"])
+                csv_writer.writerow(["timestamp", "event_type", "x", "y"])
                 needs_header = False
             last_flush = time.time()
             while not (self.stop_event.is_set() and self.event_queue.empty()):
                 try:
-                    timestamp, event_type = self.event_queue.get(timeout=0.5)
+                    timestamp, event_type, x, y = self.event_queue.get(timeout=0.5)
                 except queue.Empty:
                     continue
-                csv_writer.writerow([timestamp, event_type])
+                csv_writer.writerow([timestamp, event_type, x, y])
                 if time.time() - last_flush >= 1:
                     f.flush()
                     last_flush = time.time()
