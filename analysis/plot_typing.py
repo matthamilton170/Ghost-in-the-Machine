@@ -1,21 +1,40 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
 
 DATA_PATH = r"C:\dev\ghost-data\Test\events_2026-11-06.csv" 
 
 df = pd.read_csv(DATA_PATH)
 df["time"] = pd.to_datetime(df["timestamp"], unit="s", utc=True).dt.tz_convert("America/New_York")
 
-keys = df[df["event_type"] == "key_down"]
-per_min = keys.set_index("time").resample("1min").size()
+full_index = pd.date_range(df["time"].min().floor("1min"),df["time"].max().floor("1min"), freq="1min")
 
-fig, ax = plt.subplots(figsize=(12, 4))
-ax.plot(per_min.index, per_min.values)
-ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=per_min.index.tz))
-ax.set_xlabel("Time of day (Eastern)")
-ax.set_ylabel("Key presses per minute")
-ax.set_title("Typing activity, 6 Nov 2026")
+def per_minute_count(event_type):
+    rows = df[df["event_type"] == event_type]
+    return rows.set_index("time").resample("1min").size().reindex(full_index, fill_value=0)
+
+keys_per_min = per_minute_count("key_down")
+clicks_per_min = per_minute_count("mouse_down")
+
+mv = df[df["event_type"] == "mouse_move"].sort_values("timestamp").copy()
+mv["dist"] = np.hypot(mv["x"].diff(), mv["y"].diff())
+dist_per_min = (mv.set_index("time")["dist"].resample("1min").sum().reindex(full_index, fill_value=0))
+
+
+
+fig, axes = plt.subplots(3, 1, sharex=True, figsize=(12, 8))
+panels = [(keys_per_min, "Key presses / min"),
+          (clicks_per_min, "Clicks / min"),
+          (dist_per_min, "Mouse distance (px / min)")]
+
+for ax, (series, label) in zip(axes, panels):
+    ax.bar(series.index, series.values, width=1/1440)
+    ax.set_ylabel(label)
+
+axes[0].set_title("Input activity, 6 Nov 2026")
+axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=full_index.tz))
+axes[-1].set_xlabel("Time of day (Eastern)")
 fig.tight_layout()
-fig.savefig("docs/typing_speed.png", dpi=150)
+fig.savefig("docs/activity_overview.png", dpi=150)
 plt.show()

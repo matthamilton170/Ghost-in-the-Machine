@@ -1,0 +1,2 @@
+# 11/06/2026:
+First plots gathered. Data looks good if insubstantial. Was very interesting to delve further into plot workings and learn pandas. Need to ensure that files are named properly as the project begins to grow.

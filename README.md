@@ -7,8 +7,6 @@ Key Presses will always outnumber key releases as no way to find duplicate press
 
 ## First results
 
-![Key presses per minute over one day](docs/typing_speed.png)
+![Key presses per minute over one day](docs/activity_overview.png)
 
-*Key presses per minute across a ~8-hour session (6 Nov 2026, Eastern time). Typing is
-bursty: most of the day is idle, with a concentrated burst in the evening. Counts include
-held-key auto-repeat, and this plot shows activity only, not stress.*
+*Key presses, mouse clicks, and mouse distance moved (in screen pixels, which depends on display resolution and scaling) per minute across a ~8-hour session (6 Nov 2026, Eastern time). Activity is bursty: most of the day containes little keyboard or mouse input, with typing especially having a concentrated burst in the evening. Counts include held-key auto-repeat for key presses, and this plot shows activity only, not stress.*
