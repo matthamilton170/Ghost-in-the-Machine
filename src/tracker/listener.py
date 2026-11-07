@@ -2,6 +2,7 @@ import os
 from pynput import keyboard, mouse
 from storage import EventWriter
 import time
+from datetime import datetime
 
 LOCK_PATH = r"C:\dev\ghost-data\events.lock"
 os.makedirs(os.path.dirname(LOCK_PATH), exist_ok=True)
@@ -42,16 +43,17 @@ writer = None
 k_listener = None
 m_listener = None
 
-
+stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
 try: 
     try:
-        writer = EventWriter("C:\\dev\\ghost-data\\events.csv")
+        writer = EventWriter(rf"C:\dev\ghost-data\events_{stamp}.csv")
         k_listener = keyboard.Listener(on_press=on_press, on_release=on_release)
         m_listener = mouse.Listener(on_click=on_click, on_move=on_move)
         writer.start()
         k_listener.start()
         m_listener.start()
-        k_listener.join()
+        while k_listener.is_alive() and writer.is_alive():
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Stopping...")
     finally:
