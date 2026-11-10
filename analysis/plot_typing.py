@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
-DATA_PATH = r"C:\dev\ghost-data\Test\events_2026-11-06.csv" 
+DATA_PATH = r"C:\dev\ghost-data\events_2026-11-09_063046.csv" 
 
 df = pd.read_csv(DATA_PATH)
 df["time"] = pd.to_datetime(df["timestamp"], unit="s", utc=True).dt.tz_convert("America/New_York")
@@ -32,9 +32,16 @@ for ax, (series, label) in zip(axes, panels):
     ax.bar(series.index, series.values, width=1/1440)
     ax.set_ylabel(label)
 
-axes[0].set_title("Input activity, 6 Nov 2026")
+hb = df[df["event_type"] == "heartbeat"]["time"]
+gaps = hb.diff()
+long = gaps > pd.Timedelta(seconds=90)
+for end, gap in zip(hb[long], gaps[long]):
+    for ax in axes:
+        ax.axvspan(end - gap, end, color="grey", alpha=0.3)
+
+axes[0].set_title("Input activity, 9 Nov 2026")
 axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=full_index.tz))
 axes[-1].set_xlabel("Time of day (Eastern)")
 fig.tight_layout()
-fig.savefig("docs/activity_overview.png", dpi=150)
+fig.savefig("docs/activity_overview(9_Nov_2026).png", dpi=150)
 plt.show()
