@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
-DATA_PATH = r"C:\dev\ghost-data\events_2026-11-09_063046.csv" 
+DATA_PATH = r"C:\dev\ghost-data\events_2026-11-10_162404.csv" 
 
 df = pd.read_csv(DATA_PATH)
 df["time"] = pd.to_datetime(df["timestamp"], unit="s", utc=True).dt.tz_convert("America/New_York")
@@ -39,9 +39,9 @@ for end, gap in zip(hb[long], gaps[long]):
     for ax in axes:
         ax.axvspan(end - gap, end, color="grey", alpha=0.3)
 
-axes[0].set_title("Input activity, 9 Nov 2026")
+axes[0].set_title("Input activity, 10 Nov 2026")
 axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=full_index.tz))
 axes[-1].set_xlabel("Time of day (Eastern)")
 fig.tight_layout()
-fig.savefig("docs/activity_overview(9_Nov_2026).png", dpi=150)
+fig.savefig("docs/activity_overview(10_Nov_2026).png", dpi=150)
 plt.show()
