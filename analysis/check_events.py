@@ -48,10 +48,16 @@ print(f"Heartbeats: {len(hb)} (about {duration_s / HEARTBEAT_INTERVAL:.0f} expec
 
 if len(hb) == 0:
     warnings.append("no heartbeats (older file, or writer fault)")
+    
 else:
     long_hb_gaps = (hb.diff().dropna() > 1.5 * HEARTBEAT_INTERVAL).sum()
     if long_hb_gaps:
         warnings.append(f"{long_hb_gaps} heartbeat gaps over 90 s: logger not running then")
+        hb_gaps = hb.diff()
+        for ts, gap in zip(hb[hb_gaps > 1.5 * HEARTBEAT_INTERVAL], hb_gaps[hb_gaps > 1.5 * HEARTBEAT_INTERVAL]):
+            end = pd.to_datetime(ts, unit="s", utc=True).tz_convert("America/New_York")
+            start = end - pd.Timedelta(seconds=gap)
+            warnings.append(f"  no heartbeats {start:%H:%M:%S} to {end:%H:%M:%S} ({gap / 60:.1f} min)")
 
 activity = df[df["event_type"] != "heartbeat"].copy()
 activity["gap"] = activity["timestamp"].diff()
@@ -88,3 +94,7 @@ if warnings:
     sys.exit(1)
 else:
     print("OK: no problems found")
+
+keys = df[df["event_type"] == "key_down"]
+rapid = (keys["timestamp"].diff() < 0.05).sum()
+print(rapid, "rapid presses out of", len(keys), "key_down rows")
